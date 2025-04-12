@@ -1,0 +1,25 @@
+.date_wrapper {
+    background-color: orangered;
+    height: 80px;
+    text-align: center;
+    padding: 0; /* แก้ไขจาก 20px 0 เป็น 0 */
+    border: none;
+    margin: 0;
+
+    h3 {
+        padding-top: 20px;
+        font-size: 26px;
+        color: #fff;
+    }
+}
+
+@media (max-width: 480px) {
+    .date_wrapper {
+        h3 {
+            padding-top: 20px;
+            font-size: 20px;
+            color: #fff;
+        }
+    }
+    
+}

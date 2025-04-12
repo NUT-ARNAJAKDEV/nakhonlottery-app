@@ -1,0 +1,112 @@
+.statics_con {
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+    width: 100%;
+  
+    & .statics_content {
+      width: 100%;
+      max-width: 1170px;
+      background-color: orangered;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 20px;
+      margin: 0 15px;
+      box-sizing: border-box;
+  
+      & .statics_items {
+        color: #fff;
+        padding: 20px;
+        flex: 1;
+        min-width: 0; /* สำหรับป้องกันปัญหา text overflow */
+  
+        & h3 {
+          font-size: 3.5rem; /* ใช้ rem แทน px */
+          font-weight: bold;
+          margin-bottom: 10px;
+          line-height: 1.2;
+        }
+  
+        & p {
+          font-size: 1.25rem;
+          font-weight: bold;
+          margin: 0;
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .statics_con {
+      & .statics_content {
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 30px 20px;
+  
+        & .statics_items {
+          flex: 0 0 calc(50% - 20px);
+          padding: 15px 0;
+  
+          & h3 {
+            font-size: 3rem;
+          }
+  
+          & p {
+            font-size: 1.1rem;
+          }
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .statics_con {
+      padding: 15px 0;
+  
+      & .statics_content {
+        flex-direction: column;
+        height: auto;
+        gap: 30px;
+        padding: 30px 15px;
+  
+        & .statics_items {
+          flex: 1;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+  
+          & h3 {
+            font-size: 2.5rem;
+          }
+  
+          & p {
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .statics_con {
+      & .statics_content {
+        border-radius: 15px;
+        padding: 25px 10px;
+  
+        & .statics_items {
+          & h3 {
+            font-size: 2rem;
+          }
+  
+          & p {
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+  }

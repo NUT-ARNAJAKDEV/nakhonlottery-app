@@ -1,5 +1,5 @@
 {
-  "name": "portfolio-app",
+  "name": "nakhonlottery-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,12 +10,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
+    "@react-firebase/auth": "^0.2.10",
+    "animate.css": "^4.1.1",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.5.0",
+    "js-cookie": "^3.0.5",
     "react": "^18.2.0",
     "react-animated-cursor": "^2.11.2",
     "react-countup": "^6.5.3",
+    "react-datepicker": "^8.3.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "react-parallax-tilt": "^1.7.286",
+    "react-router-dom": "^7.5.0",
+    "react-time-picker": "^7.0.0",
     "react-type-animation": "^3.2.0",
     "react-visibility-sensor": "^5.1.1"
   },
