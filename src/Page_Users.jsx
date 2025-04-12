@@ -6,7 +6,7 @@ import { collection, addDoc, serverTimestamp, writeBatch, query, where, getDocs,
 import styles from './Page.module.css';
 import { FaBars, FaCheck, FaX } from 'react-icons/fa6';
 import Date from './components/Date/Date';
-import Random from './components/Random/Random';
+import _Random from './components/Random/_Random';
 import Cookies from 'js-cookie';
 import __Order from './components/Order/__Order';
 import More from './components/More/More'
@@ -424,7 +424,7 @@ function Page_Users() {
       )}
 
       <Date />
-      <Random />
+      <_Random />
       <__Order />
       <More />
       <div className={styles.contact_wrapper}>

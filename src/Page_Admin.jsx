@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { auth } from "./firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import Date from './components/Date/Date';
-import Random from './components/Random/Random';
+import _Random from './components/Random/_Random';
 import _Order from './components/Order/_Order';
 import Statics from './components/Statics/Statics';
 import More from './components/More/More'
@@ -371,7 +371,7 @@ function Page_Admin() {
             </nav>
 
             <Date />
-            <Random />
+            <_Random />
             <Statics />
             <_Order />
             <More />

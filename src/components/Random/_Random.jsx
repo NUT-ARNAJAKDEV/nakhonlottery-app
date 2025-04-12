@@ -168,8 +168,8 @@ function Random() {
           </div>
           <div className={styles.random_button}>
             <ul>
-              <a href='#'><li>สุ่ม</li></a>
-              <a href='#'><li>ล้างค่า</li></a>
+              <a href='#' onClick={(e) => { e.preventDefault(); handleRandom(); }}><li>สุ่ม</li></a>
+              <a href='#' onClick={(e) => { e.preventDefault(); handleClear(); }}><li>ล้างค่า</li></a>
             </ul>
           </div>
         </div>
