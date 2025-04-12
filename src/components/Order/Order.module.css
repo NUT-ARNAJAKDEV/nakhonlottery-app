@@ -1556,6 +1556,10 @@
 }
 
 @media (max-width: 576px) {
+  .clear_button {
+    padding: 8px 12px;
+  }
+
   .request_status {
     font-size: 16px;
     padding: 18px;
@@ -1604,6 +1608,10 @@
 }
 
 @media (max-width: 400px) {
+  .clear_button {
+    padding: 5px 8px;
+  }
+
   .request_status {
     font-size: 12px;
     padding: 18px;
