@@ -196,26 +196,20 @@ function Page_Users() {
     try {
       const user = auth.currentUser;
       if (!user) return;
-
-      const confirmLogout = window.confirm(
-        "คุณแน่ใจหรือไม่ที่จะออกจากระบบ?\n\nสินค้าในรถเข็นทั้งหมดจะถูกลบอัตโนมัติ"
-      );
-      if (!confirmLogout) return;
-
+  
       // บันทึกการ Logout ใน collection 'out'
       await logAuthActivity('Logout', 'out');
-
+  
       const itemsDeleted = await clearUserCart(user.email);
-
+  
       await signOut(auth);
       Cookies.remove('cookieConsent');
-      alert(`ออกจากระบบสำเร็จ${itemsDeleted > 0 ? ' สินค้าในรถเข็นถูกลบแล้ว' : ''}`);
       navigate("/");
     } catch (error) {
       console.error("Error signing out: ", error);
       alert("เกิดข้อผิดพลาดขณะออกจากระบบ: " + error.message);
     }
-  };
+  };  
 
   const handleToggle = () => {
     setToggle(!isToggled);

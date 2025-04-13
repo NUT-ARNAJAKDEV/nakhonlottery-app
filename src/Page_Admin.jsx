@@ -88,45 +88,25 @@ function Page_Admin() {
                     console.log(`ลบ ${itemsDeleted} รายการออกจากรถเข็นเมื่อล็อกอิน`);
                 }
 
-                startInactivityTimer(60);
+                // ❌ ไม่ต้องเรียก startInactivityTimer
             } else {
                 navigate('/login');
             }
             setLoading(false);
         });
 
-        // ตั้งค่า event listeners สำหรับตรวจจับกิจกรรมผู้ใช้
-        const events = ['mousemove', 'keydown', 'scroll', 'click'];
-        events.forEach(event => {
-            window.addEventListener(event, handleUserActivity);
-        });
-
         return () => {
             unsubscribe();
-            events.forEach(event => {
-                window.removeEventListener(event, handleUserActivity);
-            });
-            if (inactivityTimer) clearTimeout(inactivityTimer);
+            // ❌ ไม่ต้องลบ event หรือ timer ใดๆ
         };
     }, [navigate]);
 
-    const handleUserActivity = () => {
-        startInactivityTimer(60);
-    };
-
-    const startInactivityTimer = (minutes) => {
-        if (inactivityTimer) clearTimeout(inactivityTimer);
-        const timer = setTimeout(() => {
-            handleLogout();
-        }, minutes * 60 * 1000);
-        setInactivityTimer(timer);
-    };
 
     const logAuthEvent = async (eventType) => {
         try {
             const user = auth.currentUser;
             if (!user) return;
-    
+
             const email = user.email;
             const adminEmails = [
                 'nuttawutsensith168283@gmail.com',
@@ -134,11 +114,11 @@ function Page_Admin() {
             ];
             const isAdmin = adminEmails.includes(email);
             const right = isAdmin ? 'Admin' : 'User';
-    
+
             const now = new Date();
             const day = now.toISOString().split('T')[0];
             const time = now.toTimeString().split(' ')[0];
-    
+
             await addDoc(collection(db, 'log'), {
                 id: eventType,
                 email: email,
@@ -151,17 +131,12 @@ function Page_Admin() {
             console.error("Error logging auth event: ", error);
         }
     };
-    
+
 
     const handleLogout = async () => {
         try {
             const user = auth.currentUser;
             if (!user) return;
-
-            const confirmLogout = window.confirm(
-                "คุณแน่ใจหรือไม่ที่จะออกจากระบบ?\n\nสินค้าในรถเข็นทั้งหมดจะถูกลบอัตโนมัติ"
-            );
-            if (!confirmLogout) return;
 
             // บันทึกการ Logout ใน collection 'out'
             await logAuthActivity('Logout', 'out');
@@ -169,7 +144,6 @@ function Page_Admin() {
             const itemsDeleted = await clearUserCart(user.email);
 
             await signOut(auth);
-            alert(`ออกจากระบบสำเร็จ${itemsDeleted > 0 ? ' สินค้าในรถเข็นถูกลบแล้ว' : ''}`);
             navigate("/");
         } catch (error) {
             console.error("Error during logout: ", error);
