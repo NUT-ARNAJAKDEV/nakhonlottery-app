@@ -1483,7 +1483,7 @@ function Order() {
                                 className={styles.clear_button}
                                 title="ลบเฉพาะรายการที่ค้นหา"
                             >
-                                <FaMinus style={{ color: 'orange' }} /> {/* เพิ่มสีก็ได้ เพื่อแยกจากปุ่มเดิม */}
+                                <FaMinus style={{ color: 'white' }} /> {/* เพิ่มสีก็ได้ เพื่อแยกจากปุ่มเดิม */}
                             </button>
 
                             <button
