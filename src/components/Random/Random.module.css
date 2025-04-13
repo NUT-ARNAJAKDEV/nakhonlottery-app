@@ -76,8 +76,8 @@
 .random_input input {
     width: 100px;
     height: 100px;
-    font-size: 35px;
-    border: 0.5px solid #ccc;
+    font-size: 42px;
+    border: 0.5px solid #acacac;
     border-radius: 4px;
     padding: 0 40px;
 }
@@ -252,14 +252,22 @@ input {
     }
 
     .random_input input {
-        width: 60px;
-        height: 60px;
+        width: 44px;
+        height: 44px;
         font-size: 24px;
-        padding: 0 20px;
+        padding: 0 14px;
+        padding-right: 0;
     }
 
     .random_button ul a li {
         width: 200px;
 
+    }
+}
+
+
+@media (min-width: 360px) {
+    .random_input input {
+        padding-right: 0;
     }
 }

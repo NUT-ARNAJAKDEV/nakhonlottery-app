@@ -1607,6 +1607,26 @@
   }
 }
 
+@media (max-width: 488px) {
+  .search_button,
+  .random_button,
+  .close_search_button {
+    padding: 12px 25px;
+    font-size: 16px;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 430px) {
+  .search_button,
+  .random_button,
+  .close_search_button {
+    padding: 12px 25px;
+    font-size: 14px;
+    min-width: 80px;
+  }
+}
+
 @media (max-width: 400px) {
   .clear_button {
     padding: 5px 8px;
@@ -1658,5 +1678,63 @@
   .timer {
     font-size: 10px;
     padding: 2px 4px;
+  }
+
+  .search_inputs input {
+    width: 40px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 382px) {
+  .search_actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search_button,
+  .random_button,
+  .close_search_button {
+    padding: 6px 0px;
+    font-size: 12px;
+    min-width: 100px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 377px) {
+  .search_inputs input {
+    width: 30px;
+    height: 40px;
+  }
+
+  .search_inputs {
+    gap: 8px;
+  }
+
+  .order_list_tabs button {
+    padding: 10px 25px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 377px) {
+
+  .order_list_tabs button {
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 350px) {
+  .search_inputs input {
+    width: 10px;
+    height: 50px;
+  }
+
+  .search_inputs {
+    gap: 6px;
   }
 }
