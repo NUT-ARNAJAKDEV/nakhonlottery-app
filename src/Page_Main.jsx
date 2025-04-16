@@ -136,16 +136,16 @@ function Page_Main() {
           </div>
           {/* Mobile Menu */}
           <div className={styles.mobile_header}>
-            <a href="#" className={styles.mobile_title}>นครลอตเตอรี่</a>
+            <a onClick={scrollToTop} className={styles.mobile_title}>นครลอตเตอรี่</a>
             <FaBars className={styles.bars} onClick={handleToggle} />
           </div>
           {isToggled ? (
             <>
               <ul className={styles.mobile_menu}>
                 <li onClick={scrollToTop}><a>หน้าแรก</a></li>
-                <li onClick={handleGoogleSignIn}><a href="#" >คู่มือท่องเว็บ</a></li>
-                <li onClick={handleGoogleSignIn}><a href="#" >เกี่ยวกับเรา</a></li>
-                <li onClick={handleGoogleSignIn}><a href="#" >ข้อมูลสมาชิก</a></li>
+                <li onClick={handleGoogleSignIn}><a>คู่มือท่องเว็บ</a></li>
+                <li onClick={handleGoogleSignIn}><a>เกี่ยวกับเรา</a></li>
+                <li onClick={handleGoogleSignIn}><a>ข้อมูลสมาชิก</a></li>
               </ul>
               <div className={styles.mobile_button} onClick={handleGoogleSignIn}>
                 <p>เข้าสู่ระบบ</p>

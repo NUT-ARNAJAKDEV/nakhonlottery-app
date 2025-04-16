@@ -287,10 +287,10 @@ function Page_Admin() {
                     {isToggled ? (
                         <>
                             <ul className={styles.mobile_menu}>
-                                <li><a onClick={scrollToTop}>หน้าแรก</a></li>
-                                <li><a onClick={toggleImage3}>คู่มือท่องเว็บ</a></li>
-                                <li><a onClick={toggleImage2}>เกี่ยวกับเรา</a></li>
-                                <li><a onClick={handleMemberInfoClick}>ข้อมูลสมาชิก</a></li>
+                                <li onClick={scrollToTop}><a onClick={scrollToTop}>หน้าแรก</a></li>
+                                <li onClick={toggleImage3}><a onClick={toggleImage3}>คู่มือท่องเว็บ</a></li>
+                                <li onClick={toggleImage2}><a onClick={toggleImage2}>เกี่ยวกับเรา</a></li>
+                                <li onClick={handleMemberInfoClick}><a onClick={handleMemberInfoClick}>ข้อมูลสมาชิก</a></li>
                             </ul>
                             <div className={styles.mobile_button} onClick={() => setShowLogoutForm(true)}>
                                 <p>ออกจากระบบ</p>
