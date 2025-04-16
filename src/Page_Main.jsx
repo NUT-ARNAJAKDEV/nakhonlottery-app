@@ -9,7 +9,7 @@ import { FaBars } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider, db } from './firebaseConfig';
 import { signInWithPopup } from 'firebase/auth';
-import { FaFacebook, FaLine, FaRegUser } from 'react-icons/fa6';
+import { FaFacebook, FaLine, FaRegUser, FaAnglesUp } from 'react-icons/fa6';
 
 function Page_Main() {
   const [count, setCount] = useState(0);
@@ -92,7 +92,7 @@ function Page_Main() {
         <div className={styles.container}>
           <div className={styles.nav_con}>
             <div className={styles.nav_logo}>
-              <a href="#">นครลอตเตอรี่</a>
+              <a onClick={scrollToTop}>นครลอตเตอรี่</a>
             </div>
 
             <ul className={styles.the_nav}>
@@ -208,7 +208,7 @@ function Page_Main() {
           onClick={scrollToTop}
           className={styles.scrollToTopButton}
         >
-          ↑
+          <FaAnglesUp />
         </button>
       )}
     </>

@@ -235,6 +235,7 @@ nav .container .nav_con .nav_logo a {
   font-size: 40px;
   color: #fff;
   font-weight: bold;
+  cursor: pointer;
 }
 
 nav .container .nav_con ul {

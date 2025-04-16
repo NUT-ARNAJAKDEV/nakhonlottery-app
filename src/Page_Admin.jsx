@@ -21,7 +21,7 @@ import {
     getDocs,
     onSnapshot
 } from "firebase/firestore";
-import { FaFacebook, FaLine, FaRegUser } from 'react-icons/fa6';
+import { FaFacebook, FaLine, FaRegUser, FaAnglesUp } from 'react-icons/fa6';
 
 function Page_Admin() {
     const [user, setUser] = useState(null);
@@ -402,7 +402,7 @@ function Page_Admin() {
                     onClick={scrollToTop}
                     className={styles.scrollToTopButton}
                 >
-                    ↑
+                    <FaAnglesUp />
                 </button>
             )}
         </>

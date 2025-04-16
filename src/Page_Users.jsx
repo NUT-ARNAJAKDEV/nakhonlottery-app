@@ -10,7 +10,7 @@ import _Random from './components/Random/_Random';
 import Cookies from 'js-cookie';
 import __Order from './components/Order/__Order';
 import More from './components/More/More'
-import { FaFacebook, FaLine, FaRegUser } from 'react-icons/fa6';
+import { FaFacebook, FaLine, FaRegUser, FaAnglesUp } from 'react-icons/fa6';
 
 function Page_Users() {
   const [count, setCount] = useState(0);
@@ -452,7 +452,7 @@ function Page_Users() {
           onClick={scrollToTop}
           className={styles.scrollToTopButton}
         >
-          ↑
+          <FaAnglesUp />
         </button>
       )}
     </>
