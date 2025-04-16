@@ -37,7 +37,7 @@ function Page_Admin() {
     const [isImageVisible, setImageVisible] = useState(false);
     const [isImageVisible2, setImageVisible2] = useState(false);
     const [isImageVisible3, setImageVisible3] = useState(false);
-    const [uniqueUsers, setUniqueUsers] = useState(0); // เพิ่ม state สำหรับนับผู้ใช้งาน
+    const [authCount, setAuthCount] = useState(0); // เปลี่ยนจาก uniqueUsers เป็น authCount
 
     const toggleImage = () => {
         setImageVisible(!isImageVisible);
@@ -51,56 +51,48 @@ function Page_Admin() {
         setImageVisible3(!isImageVisible3);
     };
 
-    // ฟังก์ชันสำหรับนับจำนวนผู้ใช้งานแบบ Real-time
+    // ฟังก์ชันสำหรับนับจำนวนผู้ใช้งานแบบ Real-time จาก collection 'auth'
     useEffect(() => {
-        const q = query(
-            collection(db, 'auth'),
-            where('event', '==', 'Login')
-        );
-
-        const unsubscribeUsers = onSnapshot(q, (querySnapshot) => {
-            const emails = new Set();
-
-            querySnapshot.forEach((doc) => {
+        const authUnsub = onSnapshot(collection(db, 'auth'), (snapshot) => {
+            const uniqueEmails = new Set();
+            snapshot.forEach(doc => {
                 const data = doc.data();
                 if (data.email) {
-                    emails.add(data.email);
+                    uniqueEmails.add(data.email);
                 }
             });
-
-            setUniqueUsers(emails.size);
+            setAuthCount(uniqueEmails.size);
         });
 
-        return () => unsubscribeUsers();
+        return () => authUnsub();
     }, []);
 
     // ตรวจสอบสถานะการเข้าสู่ระบบ
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setUser(user);
-
-                // บันทึกการ Login ใน collection 'auth'
-                await logAuthActivity('Login', 'auth');
-
-                const itemsDeleted = await clearUserCart(user.email);
-                if (itemsDeleted > 0) {
-                    console.log(`ลบ ${itemsDeleted} รายการออกจากรถเข็นเมื่อล็อกอิน`);
+            try {
+                if (user) {
+                    setUser(user);
+                    await logAuthActivity('Login', 'auth');
+                    const itemsDeleted = await clearUserCart(user.email);
+                    if (itemsDeleted > 0) {
+                        console.log(`ลบ ${itemsDeleted} รายการออกจากรถเข็นเมื่อล็อกอิน`);
+                    }
+                } else {
+                    navigate('/login');
                 }
-
-                // ❌ ไม่ต้องเรียก startInactivityTimer
-            } else {
-                navigate('/login');
+                setLoading(false);
+            } catch (error) {
+                console.error("Authentication error:", error);
+                if (error.code === 'NOT_FOUND') {
+                    await signOut(auth);
+                    navigate("/");
+                }
             }
-            setLoading(false);
         });
 
-        return () => {
-            unsubscribe();
-            // ❌ ไม่ต้องลบ event หรือ timer ใดๆ
-        };
+        return () => unsubscribe();
     }, [navigate]);
-
 
     const logAuthEvent = async (eventType) => {
         try {
@@ -110,7 +102,7 @@ function Page_Admin() {
             const email = user.email;
             const adminEmails = [
                 'nuttawutsensith168283@gmail.com',
-                'Kamonmingmongkon@gmail.com'
+                'kamonmingmongkon@gmail.com'
             ];
             const isAdmin = adminEmails.includes(email);
             const right = isAdmin ? 'Admin' : 'User';
@@ -132,22 +124,23 @@ function Page_Admin() {
         }
     };
 
-
     const handleLogout = async () => {
         try {
             const user = auth.currentUser;
             if (!user) return;
 
-            // บันทึกการ Logout ใน collection 'out'
             await logAuthActivity('Logout', 'out');
-
             const itemsDeleted = await clearUserCart(user.email);
-
             await signOut(auth);
             navigate("/");
         } catch (error) {
             console.error("Error during logout: ", error);
-            alert("เกิดข้อผิดพลาดขณะออกจากระบบ: " + error.message);
+            if (error.code === 'NOT_FOUND') {
+                await signOut(auth);
+                navigate("/");
+            } else {
+                alert("เกิดข้อผิดพลาดขณะออกจากระบบ: " + error.message);
+            }
         }
     };
 
@@ -248,37 +241,34 @@ function Page_Admin() {
                 <div className={styles.container}>
                     <div className={styles.nav_con}>
                         <div className={styles.nav_logo}>
-                            <a href="#">นครลอตเตอรี่</a>
+                            <a onClick={scrollToTop}>นครลอตเตอรี่</a>
                         </div>
 
                         <ul className={styles.the_option}>
                             <li>
-                                <a
-                                    href="#"
+                                <a  onClick={scrollToTop}
                                     className={activeMenu === "หน้าแรก" ? styles.active : ""}
-                                    onClick={() => setActiveMenu("หน้าแรก")}
                                 >
                                     หน้าแรก
                                 </a>
                             </li>
                             <li>
-                                <a onClick={toggleImage3}
+                                <a  onClick={toggleImage3}
                                     className={activeMenu === "คู่มือท่องเว็บ" ? styles.active : ""}
                                 >
                                     คู่มือท่องเว็บ
                                 </a>
                             </li>
                             <li>
-                                <a onClick={toggleImage2}
+                                <a  onClick={toggleImage2}
                                     className={activeMenu === "เกี่ยวกับเรา" ? styles.active : ""}
                                 >
                                     เกี่ยวกับเรา
                                 </a>
                             </li>
                             <li>
-                                <a
+                                <a  onClick={handleMemberInfoClick}
                                     className={activeMenu === "ข้อมูลสมาชิก" ? styles.active : ""}
-                                    onClick={handleMemberInfoClick}
                                 >
                                     ข้อมูลสมาชิก
                                 </a>
@@ -291,13 +281,13 @@ function Page_Admin() {
                     </div>
                     {/* Mobile Menu */}
                     <div className={styles.mobile_header}>
-                        <a href="#" className={styles.mobile_title}>นครลอตเตอรี่</a>
+                        <a onClick={scrollToTop} className={styles.mobile_title}>นครลอตเตอรี่</a>
                         <FaBars className={styles.bars} onClick={handleToggle} />
                     </div>
                     {isToggled ? (
                         <>
                             <ul className={styles.mobile_menu}>
-                                <li><a href="#">หน้าแรก</a></li>
+                                <li><a onClick={scrollToTop}>หน้าแรก</a></li>
                                 <li><a onClick={toggleImage3}>คู่มือท่องเว็บ</a></li>
                                 <li><a onClick={toggleImage2}>เกี่ยวกับเรา</a></li>
                                 <li><a onClick={handleMemberInfoClick}>ข้อมูลสมาชิก</a></li>
@@ -342,6 +332,25 @@ function Page_Admin() {
                         </div>
                     </div>
                 )}
+                {isImageVisible3 && (
+                    <div className={styles.imageOverlay}>
+                        <div>
+                            <button className={styles.closeButton} onClick={() => setImageVisible3(false)}>×</button>
+
+                            <img src="/manual.png" alt="คู่มือเว็บไซต์" className={styles.imagePopup} />
+                        </div>
+                    </div>
+                )}
+
+                {isImageVisible2 && (
+                    <div className={styles.imageOverlay}>
+                        <div>
+                            <button className={styles.closeButton} onClick={() => setImageVisible2(false)}>×</button>
+                            <h2>เกี่ยวกับเรา</h2>
+                            <p>เว็บไซต์นี้จัดทำขึ้นโดยทีมงานนครลอตเตอรี่...</p>
+                        </div>
+                    </div>
+                )}
             </nav>
 
             <Date />
@@ -358,7 +367,7 @@ function Page_Admin() {
                                 <p>สมาชิกปัจจุบัน</p>
                             </div>
                             <div className={styles.watch_num}>
-                                <p>{uniqueUsers}</p>
+                                <p>{authCount}</p> {/* เปลี่ยนจาก uniqueUsers เป็น authCount */}
                             </div>
                         </div>
                         <div className={styles.regist}>
@@ -367,7 +376,7 @@ function Page_Admin() {
                     </div>
                     <div className={styles.contact_list}>
                         <ul className={styles.contact_nav}>
-                            <li><a href="#">หน้าแรก</a></li>
+                            <li><a onClick={scrollToTop}>หน้าแรก</a></li>
                             <li>|</li>
                             <li><a onClick={toggleImage3}>คู่มือท่องเว็บ</a></li>
                             <li>|</li>
@@ -381,30 +390,12 @@ function Page_Admin() {
                             <li><a href="https://www.facebook.com/nudtavud.senapun/" target="_blank" className={styles.facebook}><FaFacebook /></a></li>
                             <li>
                                 <div className={styles.line} onClick={toggleImage}>
-                                    <FaLine />
+                                    <FaLine onClick={() => window.open("https://line.me/ti/p/xyz", "_blank")} />
                                 </div>
                             </li>
                         </ul>
                     </div>
                 </div>
-
-                {isImageVisible && (
-                    <div className={styles.image_overlay} onClick={toggleImage}>
-                        <img src="/line-qr.png" alt="line-qr" />
-                    </div>
-                )}
-
-                {isImageVisible2 && (
-                    <div className={styles.image_overlay2} onClick={toggleImage2}>
-                        <img src="/cer.png" alt="cer" />
-                    </div>
-                )}
-
-                {isImageVisible3 && (
-                    <div className={styles.image_overlay3} onClick={toggleImage3}>
-                        <img src="/manual.png" alt="manual" />
-                    </div>
-                )}
             </div>
             {showScrollButton && (
                 <button

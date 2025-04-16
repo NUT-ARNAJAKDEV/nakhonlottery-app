@@ -27,7 +27,7 @@ function Page_Users() {
   const [isImageVisible, setImageVisible] = useState(false);
   const [isImageVisible2, setImageVisible2] = useState(false);
   const [isImageVisible3, setImageVisible3] = useState(false);
-  const [uniqueUsers, setUniqueUsers] = useState(0); // เพิ่ม state สำหรับนับผู้ใช้งาน
+  const [authCount, setAuthCount] = useState(0); // เปลี่ยนจาก uniqueUsers เป็น authCount
 
   const toggleImage = () => {
     setImageVisible(!isImageVisible);
@@ -41,81 +41,47 @@ function Page_Users() {
     setImageVisible3(!isImageVisible3);
   };
 
-  // ฟังก์ชันสำหรับนับจำนวนผู้ใช้งานแบบ Real-time
+  // ฟังก์ชันสำหรับนับจำนวนผู้ใช้งานแบบ Real-time จาก collection 'auth'
   useEffect(() => {
-    const q = query(
-      collection(db, 'auth'),
-      where('event', '==', 'Login')
-    );
-
-    const unsubscribeUsers = onSnapshot(q, (querySnapshot) => {
-      const emails = new Set();
-
-      querySnapshot.forEach((doc) => {
+    const authUnsub = onSnapshot(collection(db, 'auth'), (snapshot) => {
+      const uniqueEmails = new Set();
+      snapshot.forEach(doc => {
         const data = doc.data();
         if (data.email) {
-          emails.add(data.email);
+          uniqueEmails.add(data.email);
         }
       });
-
-      setUniqueUsers(emails.size);
+      setAuthCount(uniqueEmails.size);
     });
 
-    return () => unsubscribeUsers();
+    return () => authUnsub();
   }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // บันทึกการ Login ใน collection 'auth'
-        await logAuthActivity('Login', 'auth');
-
-        const metadata = user.metadata;
-        setMemberData({ firstLoginTime: metadata.creationTime });
-
-        // ลบสินค้าในรถเข็นเมื่อล็อกอิน
-        try {
+      try {
+        if (user) {
+          setUser(user);
+          await logAuthActivity('Login', 'auth');
           const itemsDeleted = await clearUserCart(user.email);
           if (itemsDeleted > 0) {
             console.log(`ลบ ${itemsDeleted} รายการออกจากรถเข็นเมื่อล็อกอิน`);
           }
-        } catch (error) {
-          console.error("Error clearing cart on login: ", error);
-        }
-
-        // Always show cookie consent on login (unless already given)
-        const consent = Cookies.get('cookieConsent');
-        if (consent === undefined) {
-          setShowCookieConsent(true);
-          const timer = setTimeout(() => {
-            if (cookieConsentGiven === null) {
-              handleLogout();
-            }
-          }, 30 * 60 * 1000);
-          setInactivityTimer(timer);
         } else {
-          setCookieConsentGiven(consent === 'true');
-          startInactivityTimer(consent === 'true' ? 90 : 60);
+          navigate('/login');
         }
-      } else {
-        navigate('/login');
+        setLoading(false);
+      } catch (error) {
+        console.error("Authentication error:", error);
+        if (error.code === 'NOT_FOUND') {
+          await signOut(auth);
+          navigate("/");
+        }
       }
     });
 
-    // Activity listeners
-    const events = ['mousemove', 'keydown', 'scroll', 'click'];
-    events.forEach(event => {
-      window.addEventListener(event, handleUserActivity);
-    });
-
-    return () => {
-      unsubscribe();
-      events.forEach(event => {
-        window.removeEventListener(event, handleUserActivity);
-      });
-      if (inactivityTimer) clearTimeout(inactivityTimer);
-    };
-  }, []);
+    return () => unsubscribe();
+  }, [navigate]);
 
   const handleUserActivity = () => {
     if (cookieConsentGiven !== null) {
@@ -126,7 +92,13 @@ function Page_Users() {
   const startInactivityTimer = (minutes) => {
     if (inactivityTimer) clearTimeout(inactivityTimer);
     const timer = setTimeout(() => {
-      handleLogout();
+      handleLogout().catch(error => {
+        console.error("Logout error:", error);
+        if (error.code === 'NOT_FOUND') {
+          signOut(auth);
+          navigate("/");
+        }
+      });
     }, minutes * 60 * 1000);
     setInactivityTimer(timer);
   };
@@ -145,10 +117,9 @@ function Page_Users() {
 
       const email = user.email;
 
-      // ✅ เพิ่ม email admin หลายคนได้ง่ายขึ้น
       const adminEmails = [
         'nuttawutsensith168283@gmail.com',
-        'Kamonmingmongkon@gmail.com'
+        'kamonmingmongkon@gmail.com'
       ];
 
       const isAdmin = adminEmails.includes(email);
@@ -196,20 +167,21 @@ function Page_Users() {
     try {
       const user = auth.currentUser;
       if (!user) return;
-  
-      // บันทึกการ Logout ใน collection 'out'
+
       await logAuthActivity('Logout', 'out');
-  
       const itemsDeleted = await clearUserCart(user.email);
-  
       await signOut(auth);
-      Cookies.remove('cookieConsent');
       navigate("/");
     } catch (error) {
-      console.error("Error signing out: ", error);
-      alert("เกิดข้อผิดพลาดขณะออกจากระบบ: " + error.message);
+      console.error("Error during logout: ", error);
+      if (error.code === 'NOT_FOUND') {
+        await signOut(auth);
+        navigate("/");
+      } else {
+        alert("เกิดข้อผิดพลาดขณะออกจากระบบ: " + error.message);
+      }
     }
-  };  
+  };
 
   const handleToggle = () => {
     setToggle(!isToggled);
@@ -222,7 +194,7 @@ function Page_Users() {
 
       await addDoc(collection(db, 'auth'), {
         email: user.email,
-        event: eventType, // 'Login' หรือ 'Logout'
+        event: eventType,
         timestamp: serverTimestamp()
       });
       console.log(`Logged ${eventType} event for ${user.email}`);
@@ -283,38 +255,34 @@ function Page_Users() {
         <div className={styles.container}>
           <div className={styles.nav_con}>
             <div className={styles.nav_logo}>
-              <a href="#">นครลอตเตอรี่</a>
+              <a onClick={scrollToTop}>นครลอตเตอรี่</a>
             </div>
 
             <ul className={styles.the_nav}>
               <li>
-                <a
+                <a onClick={scrollToTop}
                   className={activeMenu === "หน้าแรก" ? styles.active : ""}
-                  onClick={scrollToTop}
                 >
                   หน้าแรก
                 </a>
               </li>
               <li>
-                <a
+                <a onClick={toggleImage3}
                   className={activeMenu === "คู่มือท่องเว็บ" ? styles.active : ""}
-                  onClick={toggleImage3}
                 >
                   คู่มือท่องเว็บ
                 </a>
               </li>
               <li>
-                <a
+                <a onClick={toggleImage2}
                   className={activeMenu === "เกี่ยวกับเรา" ? styles.active : ""}
-                  onClick={toggleImage2}
                 >
                   เกี่ยวกับเรา
                 </a>
               </li>
               <li>
-                <a
+                <a onClick={handleMemberInfoClick}
                   className={styles.profile}
-                  onClick={handleMemberInfoClick}
                 >
                   ข้อมูลสมาชิก
                 </a>
@@ -331,7 +299,7 @@ function Page_Users() {
 
           {/* Mobile Menu */}
           <div className={styles.mobile_header}>
-            <a href="#" className={styles.mobile_title}>นครลอตเตอรี่</a>
+            <a onClick={scrollToTop} className={styles.mobile_title}>นครลอตเตอรี่</a>
             <FaBars className={styles.bars} onClick={handleToggle} />
           </div>
 
@@ -341,7 +309,7 @@ function Page_Users() {
                 <li><a onClick={scrollToTop}>หน้าแรก</a></li>
                 <li><a onClick={toggleImage3}>คู่มือท่องเว็บ</a></li>
                 <li><a onClick={toggleImage2}>เกี่ยวกับเรา</a></li>
-                <li><a className={styles.profile} onClick={handleMemberInfoClick}>ข้อมูลสมาชิก</a></li>
+                <li><a onClick={handleMemberInfoClick} className={styles.profile}>ข้อมูลสมาชิก</a></li>
               </ul>
               <div
                 className={styles.mobile_button}
@@ -390,6 +358,25 @@ function Page_Users() {
             </div>
           </div>
         )}
+        {isImageVisible3 && (
+          <div className={styles.imageOverlay}>
+            <div>
+              <button className={styles.closeButton} onClick={() => setImageVisible3(false)}>×</button>
+              
+              <img src="/manual.png" alt="คู่มือเว็บไซต์" className={styles.imagePopup} />
+            </div>
+          </div>
+        )}
+
+        {isImageVisible2 && (
+          <div className={styles.imageOverlay}>
+            <div>
+              <button className={styles.closeButton} onClick={() => setImageVisible2(false)}>×</button>
+              <h2>เกี่ยวกับเรา</h2>
+              <p>เว็บไซต์นี้จัดทำขึ้นโดยทีมงานนครลอตเตอรี่...</p>
+            </div>
+          </div>
+        )}
       </nav>
 
       {showCookieConsent && (
@@ -430,7 +417,7 @@ function Page_Users() {
                 <p>สมาชิกปัจจุบัน</p>
               </div>
               <div className={styles.watch_num}>
-                <p>{uniqueUsers}</p>
+                <p>{authCount}</p> {/* เปลี่ยนจาก uniqueUsers เป็น authCount */}
               </div>
             </div>
             <div className={styles.regist}>
@@ -445,7 +432,7 @@ function Page_Users() {
               <li>|</li>
               <li><a onClick={toggleImage2}>เกี่ยวกับเรา</a></li>
               <li>|</li>
-              <li><a className={styles.profile} onClick={handleMemberInfoClick}>ข้อมูลสมาชิก</a></li>
+              <li><a onClick={handleMemberInfoClick} className={styles.profile}>ข้อมูลสมาชิก</a></li>
               <li>|</li>
               <li><p>ติดต่อเรา Contact Us :</p></li>
             </ul>
@@ -459,24 +446,6 @@ function Page_Users() {
             </ul>
           </div>
         </div>
-
-        {isImageVisible && (
-          <div className={styles.image_overlay} onClick={toggleImage}>
-            <img src="/line-qr.png" alt="line-qr" className={styles.image_display} />
-          </div>
-        )}
-
-        {isImageVisible2 && (
-          <div className={styles.image_overlay2} onClick={toggleImage2}>
-            <img src="/cer.png" alt="cer" />
-          </div>
-        )}
-
-        {isImageVisible3 && (
-          <div className={styles.image_overlay3} onClick={toggleImage3}>
-            <img src="/manual.png" alt="manual" />
-          </div>
-        )}
       </div>
       {showScrollButton && (
         <button

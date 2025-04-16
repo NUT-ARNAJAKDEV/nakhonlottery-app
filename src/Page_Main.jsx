@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import Date from './components/Date/Date';
 import Random from './components/Random/Random';
 import Order from './components/Order/Order';
@@ -13,7 +13,7 @@ import { FaFacebook, FaLine, FaRegUser } from 'react-icons/fa6';
 
 function Page_Main() {
   const [count, setCount] = useState(0);
-  const [uniqueUsers, setUniqueUsers] = useState(0);
+  const [authCount, setAuthCount] = useState(0); // เปลี่ยนจาก uniqueUsers เป็น authCount
 
   // โค้ดจาก Navbar component
   const [activeMenu, setActiveMenu] = useState("หน้าแรก");
@@ -25,27 +25,20 @@ function Page_Main() {
     setImageVisible(!isImageVisible);
   };
 
-  // ฟังก์ชันสำหรับนับจำนวนผู้ใช้งานแบบ Real-time
+  // ฟังก์ชันสำหรับนับจำนวนผู้ใช้งานแบบ Real-time จาก collection 'auth'
   useEffect(() => {
-    const q = query(
-      collection(db, 'auth'),
-      where('event', '==', 'Login')
-    );
-    
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const emails = new Set();
-      
-      querySnapshot.forEach((doc) => {
+    const authUnsub = onSnapshot(collection(db, 'auth'), (snapshot) => {
+      const uniqueEmails = new Set();
+      snapshot.forEach(doc => {
         const data = doc.data();
         if (data.email) {
-          emails.add(data.email);
+          uniqueEmails.add(data.email);
         }
       });
-      
-      setUniqueUsers(emails.size);
+      setAuthCount(uniqueEmails.size);
     });
 
-    return () => unsubscribe();
+    return () => authUnsub();
   }, []);
 
   const handleGoogleSignIn = async (e) => {
@@ -54,7 +47,7 @@ function Page_Main() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      if (user.email === 'nuttawutsensith168283@gmail.com' || user.email === 'Kamonmingmongkon@gmail.com') {
+      if (user.email === 'nuttawutsensith168283@gmail.com' || user.email === 'kamonmingmongkon@gmail.com') {
         console.log("User signed in with correct email:", user);
         navigate('/admin');
       } else {
@@ -174,7 +167,7 @@ function Page_Main() {
                 <p>สมาชิกปัจจุบัน</p>
               </div>
               <div className={styles.watch_num}>
-                <p>{uniqueUsers}</p>
+                <p>{authCount}</p> {/* เปลี่ยนจาก uniqueUsers เป็น authCount */}
               </div>
             </div>
             <div className={styles.regist}>
